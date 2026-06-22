@@ -395,9 +395,49 @@ function startSim(canvas: HTMLCanvasElement): void {
     splat.u.uSource.value = dye.read.texture; pass(splat, dye.write); dye.swap();
   }
 
+  function seedIntro(): void {
+    const sweeps: Array<[number, number, number, number, number]> = [
+      [0.18, 0.56, 130, 20, 0.016],
+      [0.34, 0.58, -120, 18, 0.015],
+      [0.50, 0.55, 140, -22, 0.016],
+      [0.66, 0.57, -135, 20, 0.015],
+      [0.82, 0.54, 115, -18, 0.014],
+      [0.68, 0.51, -110, 16, 0.014],
+    ];
+    for (const [x, y, dx, dy, colorMix] of sweeps) {
+      doSplat(x, y, dx, dy, lapis(colorMix), 0.032);
+    }
+  }
+
+  function isInteractiveTarget(target: EventTarget | null): boolean {
+    return target instanceof Element && !!target.closest('a, button, [role="button"], input, textarea, select, label');
+  }
+
   function toUV(clientX: number, clientY: number): [number, number] { return [clientX / window.innerWidth, 1 - clientY / window.innerHeight]; }
-  window.addEventListener('pointermove', (e) => { if (!e.isPrimary) return; const [ux, uy] = toUV(e.clientX, e.clientY); input.x = ux; input.y = uy; input.moved = true; input.lastMove = performance.now(); }, { passive: true });
-  window.addEventListener('pointerdown', (e) => { if (!e.isPrimary) return; const [ux, uy] = toUV(e.clientX, e.clientY); input.x = input.px = ux; input.y = input.py = uy; input.down = true; input.downX = e.clientX; input.downY = e.clientY; input.downT = performance.now(); input.lastMove = performance.now(); }, { passive: true });
+  let cursorSuppressed = false;
+  window.addEventListener('pointermove', (e) => {
+    if (!e.isPrimary) return;
+    cursorSuppressed = isInteractiveTarget(e.target);
+    if (cursorSuppressed) return;
+    const [ux, uy] = toUV(e.clientX, e.clientY);
+    input.x = ux;
+    input.y = uy;
+    input.moved = true;
+    input.lastMove = performance.now();
+  }, { passive: true });
+  window.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary) return;
+    cursorSuppressed = isInteractiveTarget(e.target);
+    if (cursorSuppressed) return;
+    const [ux, uy] = toUV(e.clientX, e.clientY);
+    input.x = input.px = ux;
+    input.y = input.py = uy;
+    input.down = true;
+    input.downX = e.clientX;
+    input.downY = e.clientY;
+    input.downT = performance.now();
+    input.lastMove = performance.now();
+  }, { passive: true });
   window.addEventListener('pointerup', (e) => { if (!e.isPrimary) return; if (input.down && Math.hypot(e.clientX - input.downX, e.clientY - input.downY) < 10 && performance.now() - input.downT < 250) input.tap = true; input.down = false; }, { passive: true });
 
   let visible = !document.hidden, inView = true, raf = 0;
@@ -414,6 +454,7 @@ function startSim(canvas: HTMLCanvasElement): void {
     const ambientDye = dyeMul * fluidState.ambientDye;
     const windHold = Math.max(0.1, fluidState.windHold);
     const windMorph = Math.max(0.1, fluidState.windMorph);
+    const windIntro = Math.min(1, T / 4);
 
     const fr = Math.min(dt * 60, 2);
     // ---- wind: advance the user-tuned cycle and morph between the current/next pattern ----
@@ -432,7 +473,7 @@ function startSim(canvas: HTMLCanvasElement): void {
       windW[i] = wa.w[i] + (wb.w[i] - wa.w[i]) * ease;
     }
     // ---- a gentle, relaxed broad flow (おおらか) from the active wind sources ----
-    forceP.u.uVelocity.value = velocity.read.texture; forceP.u.uTime.value = T; forceP.u.uAmt.value = fluidState.windStrength; forceP.u.uScale.value = fluidState.windScale; pass(forceP, velocity.write); velocity.swap();
+    forceP.u.uVelocity.value = velocity.read.texture; forceP.u.uTime.value = T; forceP.u.uAmt.value = fluidState.windStrength * windIntro; forceP.u.uScale.value = fluidState.windScale; pass(forceP, velocity.write); velocity.swap();
     // ---- several big soft sources drifting across the screen → even broad smoke, no gradient wash ----
     for (let i = 0; i < ambientCount; i++) {
       const ex = ebx[i] + 0.24 * Math.cos(T * 0.024 + eph[i]) + 0.10 * Math.cos(T * 0.055 + eph[i] * 1.7);
@@ -442,7 +483,7 @@ function startSim(canvas: HTMLCanvasElement): void {
       doSplat(ex, ey, dvx * 2200 - dvy * 14, dvy * 2200 + dvx * 14, lapis(0.016 * fr * ambientDye), 0.026 * ambientSize);  // soft source, broad wind
     }
     // ---- cursor: a big soft local source on top, only when present ----
-    if ((now - input.lastMove) < 650) {
+    if (!cursorSuppressed && (now - input.lastMove) < 650) {
       // on re-appearance from idle, teleport the source to the cursor (zero velocity)
       // so it doesn't streak across the screen catching up from its last position
       if (!cursorActive) { emitX = prevEmitX = input.x; emitY = prevEmitY = input.y; }
@@ -495,9 +536,8 @@ function startSim(canvas: HTMLCanvasElement): void {
   }
 
   resize();
+  seedIntro();
   window.addEventListener('resize', resize, { passive: true });
-  // seed a few smoky splats so the field is visible immediately on first paint
-  for (let i = 0; i < 10; i++) { const ang = Math.random() * Math.PI * 2; doSplat(Math.random(), Math.random(), Math.cos(ang) * 900, Math.sin(ang) * 900, lapis(0.65), 0.03); }
   document.addEventListener('visibilitychange', () => { visible = !document.hidden; gate(); });
   if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => { inView = e.isIntersecting; gate(); }, { threshold: 0 }).observe(canvas);
   canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); if (raf) cancelAnimationFrame(raf); raf = 0; });

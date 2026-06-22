@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import { controlGroups } from '../scripts/fluid-controls';
+---
+
+<Base title="Tomoki Sawai — Controls Backup" description="Backup page for the fluid controls layout.">
+  <main class="hero">
+    <div class="hero-shell">
+      <p class="hero-kicker reveal">Backup / Controls / Debug</p>
+      <h1 class="hero-name">Tomoki Sawai</h1>
+      <p class="hero-role reveal">
+        Hidden slider layout<span class="sep">/</span>backup page<span class="sep">/</span>optional debug view
+      </p>
+      <p class="hero-summary reveal">
+        This page keeps the slider-driven version around without putting it on the main homepage.
+      </p>
+      <p class="hero-note reveal">Main site stays clean. This route is the fallback.</p>
+    </div>
+  </main>
+
+  <aside class="fluid-panel" id="fluid-controls" aria-label="流体調整">
+    <div class="fluid-panel-head">
+      <p class="fluid-title">調整</p>
+      <div class="fluid-actions">
+        <button class="fluid-reset" type="button" data-export>JSON書き出し</button>
+        <button class="fluid-reset" type="button" data-reset>デフォルトに戻す</button>
+      </div>
+    </div>
+    {controlGroups.map((group) => (
+      <section class="fluid-group" aria-label={group.title}>
+        <h2 class="fluid-group-title">{group.title}</h2>
+        <div class="fluid-grid">
+          {group.items.map((item) => {
+            const id = `fluid-${item.key}`;
+            return (
+              <label class="fluid-control" for={id}>
+                <span class="fluid-control-head">
+                  <span class="fluid-control-label">{item.label}</span>
+                  <output class="fluid-control-value" data-output-for={item.key} />
+                </span>
+                <input
+                  id={id}
+                  type="range"
+                  min={item.min}
+                  max={item.max}
+                  step={item.step}
+                  value={item.defaultValue}
+                  data-param={item.key}
+                  aria-label={item.label}
+                />
+              </label>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </aside>
+</Base>

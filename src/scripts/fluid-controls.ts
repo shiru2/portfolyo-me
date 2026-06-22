@@ -1,4 +1,13 @@
-import { defaults, limits, loadFluidParams, resetFluidParams, saveFluidParams, state, type FluidParams } from './fluid-state';
+import {
+  backupCurrent,
+  defaults,
+  limits,
+  loadFluidParams,
+  resetFluidParams,
+  saveFluidParams,
+  state,
+  type FluidParams,
+} from './fluid-state';
 
 export type ControlItem = {
   key: keyof FluidParams;
@@ -81,6 +90,7 @@ export function mountFluidControls(root: HTMLElement | null): void {
 
   const inputs = Array.from(root.querySelectorAll<HTMLInputElement>('input[data-param]'));
   const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
+  const exportButton = root.querySelector<HTMLButtonElement>('[data-export]');
 
   for (const input of inputs) {
     syncInput(input);
@@ -100,5 +110,24 @@ export function mountFluidControls(root: HTMLElement | null): void {
   reset?.addEventListener('click', () => {
     resetFluidParams();
     for (const input of inputs) syncInput(input);
+  });
+
+  exportButton?.addEventListener('click', () => {
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      source: 'controls-backup',
+      current: { ...backupCurrent },
+      defaults: { ...defaults },
+      limits: Object.fromEntries(
+        Object.entries(limits).map(([key, value]) => [key, { min: value[0], max: value[1] }]),
+      ),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fluid-backup-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 }

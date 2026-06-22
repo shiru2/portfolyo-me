@@ -1,8 +1,7 @@
 /* =========================================================================
-   portfolyo-me — single first-view page (no scroll). Original work.
+   portfolyo-me — minimal editorial landing page for Tomoki Sawai
    ========================================================================= */
 
-/* ---- self-hosted Latin variable fonts (weight axis only, no italic) ---- */
 @font-face {
   font-family: 'Geist';
   src: url('/fonts/geist-sans.woff2') format('woff2');
@@ -18,7 +17,6 @@
   font-display: swap;
 }
 @font-face {
-  /* metric-matched fallback (measured from the Geist woff2) → near-zero CLS on swap */
   font-family: 'Geist Fallback';
   src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
   size-adjust: 102.21%;
@@ -30,58 +28,75 @@
 :root {
   color-scheme: dark;
 
-  /* motion — our own curves from the standard ease-out family (no overshoot) */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.25, 1, 0.5, 1);
   --t-fast: 0.2s;
   --t-base: 0.5s;
   --t-slow: 1.1s;
 
-  /* palette — near-black ground, warm off-white ink, one lapis accent (Ruri) */
-  --ink-deep: #08090c;
-  --paper: #eceae3;
-  --paper-dim: #9a9c9b;
-  --paper-faint: #43464b;
-  --lapis: #3e6cae;
-  --focus: #6b95d6;
+  --ink-deep: #06070a;
+  --paper: #f3eee5;
+  --paper-dim: #aca69d;
+  --paper-faint: #686259;
+  --line: rgba(255, 255, 255, 0.08);
+  --sand: #d8bf8f;
+  --teal: #92b8b0;
+  --focus: #d8bf8f;
 
   --font-sans: 'Geist', 'Geist Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, 'Cascadia Mono', Consolas, monospace;
 
-  --fs-hero: clamp(2.5rem, 6.6vw, 5.25rem);
-  --fs-meta: 0.8125rem;
-  --fs-label: 0.6875rem;
-
-  --gutter: clamp(1.5rem, 6vw, 5rem);
-
-  /* the static poster — LCP-safe, the no-JS / reduced-motion / no-WebGL ground */
-  --poster: radial-gradient(135% 130% at 20% 18%, #15171d 0%, #0b0c10 52%, #08090c 100%);
+  --fs-hero: clamp(3rem, 8vw, 6.75rem);
+  --fs-meta: 0.8rem;
+  --fs-label: 0.7rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --poster:
+    radial-gradient(100% 70% at 18% 16%, rgba(146, 184, 176, 0.2) 0%, rgba(146, 184, 176, 0.04) 34%, transparent 66%),
+    radial-gradient(70% 55% at 82% 20%, rgba(216, 191, 143, 0.18) 0%, rgba(216, 191, 143, 0.04) 34%, transparent 70%),
+    radial-gradient(120% 100% at 50% 110%, rgba(181, 117, 82, 0.1) 0%, transparent 45%),
+    linear-gradient(180deg, #0a0b0f 0%, #06070a 100%);
 }
 
-/* ---- reset ---- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html, body { height: 100%; }
+html,
+body {
+  height: 100%;
+}
 
 body {
   font-family: var(--font-sans);
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: 1.05rem;
+  line-height: 1.58;
   color: var(--paper);
   background-color: var(--ink-deep);
   background-image: var(--poster);
   height: 100dvh;
-  overflow: hidden;                 /* single first-view page — no scroll */
+  overflow: hidden;
   -webkit-user-select: none;
-  user-select: none;                /* no text selection → no blue drag-overlay, no click jank */
+  user-select: none;
   -webkit-touch-callout: none;
-  touch-action: manipulation;       /* kill the 300ms tap delay; page never scrolls anyway */
+  touch-action: manipulation;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern' 1;
 }
 
-/* the WebGL field fills the viewport behind everything and never eats input */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.02), transparent 30%),
+    linear-gradient(240deg, rgba(255, 255, 255, 0.03), transparent 24%);
+  opacity: 0.45;
+}
+
 #fluid {
   position: fixed;
   inset: 0;
@@ -93,65 +108,162 @@ body {
   opacity: 0;
   transition: opacity var(--t-slow) var(--ease-soft);
 }
-#fluid.is-live { opacity: 1; }
 
-::selection { background: color-mix(in srgb, var(--lapis) 38%, transparent); color: var(--paper); }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 1px; }
+#fluid.is-live {
+  opacity: 1;
+}
 
-/* ---- hero (the whole page), left-aligned, vertically centred ---- */
+::selection {
+  background: color-mix(in srgb, var(--sand) 34%, transparent);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 .hero {
-  height: 100dvh;
-  display: flex;
+  min-height: 100dvh;
+  display: grid;
   align-items: center;
   padding-inline: var(--gutter);
 }
-.hero-inner { width: 100%; max-width: 48rem; }
-/* gentle halo so glyphs stay legible where bright smoke crosses; the smoke itself is also thinned behind the text block in the display shader */
-.hero-name, .hero-role, .hero-summary, .hero-links, .hero-cap {
-  text-shadow: 0 1px 14px rgba(6, 7, 10, 0.5);
+
+.hero-shell {
+  width: min(100%, 62rem);
+  margin-inline: auto;
+  display: grid;
+  gap: 0.9rem;
+  padding-block: 2rem;
 }
 
-.hero-name {
-  font-size: var(--fs-hero);
-  font-weight: 560;
-  line-height: 1.0;
-  letter-spacing: -0.028em;
-  margin-left: -0.05em;   /* optical: pull the cap "H" side-bearing back to the text edge below */
-  color: var(--paper);
+.hero-kicker,
+.hero-role,
+.hero-summary,
+.hero-note,
+.tag {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.12);
 }
-.hero-role {
-  margin-top: 1.5rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-meta);
-  letter-spacing: 0.01em;
-  color: var(--paper-dim);
-}
-.hero-role .sep { color: var(--paper-faint); padding-inline: 0.45em; }
-.hero-summary {
-  margin-top: 1.6rem;
-  max-width: 32rem;
-  font-size: 1.15rem;
-  line-height: 1.5;
-  color: color-mix(in srgb, var(--paper) 88%, transparent);
-}
-.hero-links {
-  margin-top: 2.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 1.4rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-meta);
-}
-.hero-cap {
-  margin-top: 3.25rem;
+
+.hero-kicker {
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--paper-faint);
 }
 
-/* ---- links (the underline is the rationed-accent signal) ---- */
+.hero-name {
+  font-size: var(--fs-hero);
+  font-weight: 640;
+  line-height: 0.93;
+  letter-spacing: -0.055em;
+  margin-left: -0.055em;
+  color: #ffffff;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.55), 0 0 1px rgba(255, 255, 255, 0.2);
+  text-wrap: balance;
+}
+
+.hero-role {
+  max-width: 42rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.04em;
+  color: #f3f1ea;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.hero-role .sep {
+  color: #ffffff;
+  padding-inline: 0.45em;
+}
+
+.hero-summary {
+  max-width: 36rem;
+  font-size: clamp(1rem, 1.8vw, 1.12rem);
+  line-height: 1.65;
+  color: #ffffff;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7), 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.1rem;
+  padding: 0 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.hero-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+}
+
+.works-preview {
+  width: fit-content;
+  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.72), 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.works-preview::after {
+  content: '';
+  width: 2.25rem;
+  height: 1px;
+  margin-left: 0.6rem;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.86), rgba(216, 191, 143, 0.16));
+  transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+  transform-origin: left;
+  opacity: 0.82;
+}
+
+.works-preview:hover,
+.works-preview:focus-visible {
+  color: color-mix(in srgb, #ffffff 86%, var(--sand));
+}
+
+.works-preview:hover::after,
+.works-preview:focus-visible::after {
+  transform: translateX(0.25rem);
+  opacity: 1;
+}
+
 .link {
   position: relative;
   color: var(--paper);
@@ -163,31 +275,54 @@ body {
   cursor: pointer;
   transition: color var(--t-fast) var(--ease);
 }
+
 .link::after {
   content: '';
   position: absolute;
-  left: 0; right: 0; bottom: -2px;
+  left: 0;
+  right: 0;
+  bottom: -0.15rem;
   height: 1px;
-  background: var(--lapis);
+  background: linear-gradient(90deg, var(--sand), var(--teal));
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--t-fast) var(--ease);
 }
-.link:hover::after, .link:focus-visible::after { transform: scaleX(1); }
-.copied[data-copied]::after { content: attr(data-copied); position: static; height: auto; transform: none; margin-left: 0.5em; color: var(--lapis); }
 
-/* ---- fluid controls ---- */
+.link:hover,
+.link:focus-visible {
+  color: color-mix(in srgb, var(--paper) 78%, var(--sand));
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.inline-url {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--sand) 55%, transparent);
+}
+
+.inline-url:hover,
+.inline-url:focus-visible {
+  color: color-mix(in srgb, var(--paper) 78%, var(--sand));
+}
+
 .fluid-panel {
   position: fixed;
   right: 1rem;
   bottom: 1rem;
-  width: min(24.5rem, calc(100vw - 2rem));
+  width: min(24rem, calc(100vw - 2rem));
   max-height: calc(100dvh - 2rem);
   padding: 1rem 1rem 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--paper-faint) 68%, transparent);
-  background: color-mix(in srgb, var(--ink-deep) 86%, transparent);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 11, 15, 0.78);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.38);
   overflow: auto;
   z-index: 3;
 }
@@ -200,16 +335,23 @@ body {
   margin-bottom: 1rem;
 }
 
+.fluid-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .fluid-title {
   font-size: 0.76rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--paper);
 }
 
 .fluid-reset {
-  border: 1px solid color-mix(in srgb, var(--paper-faint) 56%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.03);
   color: var(--paper);
   font: inherit;
@@ -219,12 +361,17 @@ body {
   cursor: pointer;
   transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
-.fluid-reset:hover, .fluid-reset:focus-visible {
-  border-color: color-mix(in srgb, var(--lapis) 68%, transparent);
-  background: rgba(62, 108, 174, 0.12);
+
+.fluid-reset:hover,
+.fluid-reset:focus-visible {
+  border-color: color-mix(in srgb, var(--sand) 70%, transparent);
+  background: rgba(216, 191, 143, 0.11);
 }
 
-.fluid-group + .fluid-group { margin-top: 0.95rem; }
+.fluid-group + .fluid-group {
+  margin-top: 0.95rem;
+}
+
 .fluid-group-title {
   margin-bottom: 0.55rem;
   font-size: 0.71rem;
@@ -256,15 +403,101 @@ body {
   line-height: 1.2;
 }
 
-.fluid-control-label { color: var(--paper); }
-.fluid-control-value { color: var(--paper-dim); font-variant-numeric: tabular-nums; }
+.fluid-control-label {
+  color: var(--paper);
+}
+
+.fluid-control-value {
+  color: var(--paper-dim);
+  font-variant-numeric: tabular-nums;
+}
 
 .fluid-control input[type='range'] {
   width: 100%;
-  accent-color: var(--lapis);
+  accent-color: var(--sand);
+}
+
+.works-page {
+  min-height: 100dvh;
+  padding: clamp(1.25rem, 4vw, 3rem) var(--gutter);
+  display: grid;
+  gap: 2rem;
+  align-content: center;
+}
+
+.works-hero {
+  width: min(100%, 62rem);
+  margin-inline: auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.works-list {
+  width: min(100%, 62rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.work-card {
+  position: relative;
+  padding: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(14px);
+  min-height: 11rem;
+}
+
+.work-category {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+}
+
+.work-title {
+  margin-top: 0.55rem;
+  font-size: 1.2rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.work-summary {
+  margin-top: 0.75rem;
+  font-size: 0.97rem;
+  line-height: 1.58;
+  color: color-mix(in srgb, var(--paper) 88%, transparent);
+}
+
+.work-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+@media (min-width: 900px) {
+  .hero-shell {
+    width: min(100%, 68rem);
+  }
 }
 
 @media (max-width: 760px) {
+  .hero {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .hero-shell {
+    gap: 0.9rem;
+  }
+
+  .hero-name {
+    font-size: clamp(2.85rem, 15vw, 4.9rem);
+  }
+
   .fluid-panel {
     left: 0.75rem;
     right: 0.75rem;
@@ -272,31 +505,80 @@ body {
     width: auto;
     max-height: 42dvh;
   }
+
+  .works-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 560px) {
+  .hero-summary {
+    display: none;
+  }
+
+  .hero-note {
+    display: none;
+  }
 }
 
 /* =========================================================================
-   motion: run-once reveal (progressive enhancement — only when JS is on)
+   motion: run-once reveal (progressive enhancement - only when JS is on)
    ========================================================================= */
-.js .hero-name { opacity: 0; transform: translateY(0.3em); transition: opacity var(--t-slow) var(--ease-soft), transform var(--t-slow) var(--ease-soft); }
-.js .hero.is-in .hero-name { opacity: 1; transform: none; }
+.js .hero-name {
+  opacity: 0;
+  transform: translateY(0.35em);
+  transition: opacity var(--t-slow) var(--ease-soft), transform var(--t-slow) var(--ease-soft);
+}
 
-.js .reveal { opacity: 0; transform: translateY(12px); transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease); }
-.js .reveal.is-in { opacity: 1; transform: none; }
-.js .hero-role { transition-delay: 0.16s; }
-.js .hero-summary { transition-delay: 0.26s; }
-.js .hero-links { transition-delay: 0.36s; }
-.js .hero-cap { transition-delay: 0.5s; }
+.js .hero.is-in .hero-name {
+  opacity: 1;
+  transform: none;
+}
+
+.js .reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+}
+
+.js .reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.js .hero-kicker {
+  transition-delay: 0.08s;
+}
+
+.js .hero-role {
+  transition-delay: 0.16s;
+}
+
+.js .hero-summary {
+  transition-delay: 0.24s;
+}
+
+.js .hero-meta {
+  transition-delay: 0.32s;
+}
+
+.js .hero-links {
+  transition-delay: 0.4s;
+}
+
+.js .hero-note {
+  transition-delay: 0.48s;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .js .hero-name, .js .reveal { transition: none; opacity: 1; transform: none; }
-  #fluid { transition: none; }
-}
+  .js .hero-name,
+  .js .reveal {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
 
-@media (max-width: 540px) {
-  .hero-summary { font-size: 1.05rem; }
-  .hero-cap { margin-top: 2.5rem; }
-}
-@media (max-height: 560px) {
-  .hero-summary { display: none; }   /* keep the first view intact on short/landscape phones */
-  .hero-cap { display: none; }
+  #fluid {
+    transition: none;
+  }
 }

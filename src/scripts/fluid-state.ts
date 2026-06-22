@@ -25,22 +25,24 @@ export const defaults: FluidParams = {
   colorG: 0.10,
   colorB: 0.06,
   ambientCount: 2,
-  ambientSize: 0.74,
-  ambientDye: 0.74,
-  windStrength: 0.61,
+  ambientSize: 0.68,
+  ambientDye: 0.6,
+  windStrength: 0.56,
   windScale: 1.23,
   windHold: 3.9,
   windMorph: 6.4,
   vorticity: 12,
-  velocityDissipation: 0.30,
-  dyeDissipation: 0.2,
-  bloomAmt: 0.62,
+  velocityDissipation: 0.18,
+  dyeDissipation: 0.13,
+  bloomAmt: 0.58,
   bloomThreshold: 0.2,
   bloomKnee: 0.12,
-  blackPoint: 0.2,
+  blackPoint: 0.18,
   cursorForce: 3200,
   cursorSize: 1,
 };
+
+export const backupCurrent: FluidParams = { ...defaults };
 
 export const state: FluidParams = { ...defaults };
 
@@ -81,11 +83,13 @@ export function applyFluidParams(next: Partial<FluidParams>): void {
       state[key] = clamp(key, value);
     }
   }
+  Object.assign(backupCurrent, state);
   saveFluidParams();
 }
 
 export function resetFluidParams(): void {
   Object.assign(state, defaults);
+  Object.assign(backupCurrent, state);
   saveFluidParams();
 }
 
@@ -101,6 +105,7 @@ export function loadFluidParams(): void {
         state[key] = clamp(key, value);
       }
     }
+    Object.assign(backupCurrent, state);
   } catch {
     // fall back to defaults
   }
@@ -108,6 +113,7 @@ export function loadFluidParams(): void {
 
 export function saveFluidParams(): void {
   try {
+    Object.assign(backupCurrent, state);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
     // ignore storage failures

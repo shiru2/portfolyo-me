@@ -8,34 +8,31 @@ export interface Props {
 
 const site = 'https://shiru2.github.io/portfolyo-me';
 const {
-  title = 'Hayato Tsukagoshi',
+  title = 'Tomoki Sawai',
   description =
-    'Hayato Tsukagoshi — ML engineer, fluid experiments, and personal work.',
+    'Tomoki Sawai — researching MRI acceleration with diffusion models.',
 } = Astro.props;
 
 // keep the social-card title clean (just the name); make the <title> tag descriptive for search
-const pageTitle = title === 'Hayato Tsukagoshi' ? 'Hayato Tsukagoshi — Fluid Experiments & Personal Work' : title;
+const pageTitle = title === 'Tomoki Sawai' ? 'Tomoki Sawai — diffusion for MRI research' : title;
 const canonical = new URL(Astro.url.pathname, site).href;
 const ogImage = `${site}/og.jpg`;
-const ogAlt = 'Hayato Tsukagoshi — ML engineer, fluid experiments, and personal work';
+const ogAlt = 'Tomoki Sawai — researching MRI acceleration with diffusion models.';
 
 const personLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
-  name: 'Hayato Tsukagoshi',
-  alternateName: '塚越駿',
+  name: 'Tomoki Sawai',
   url: site,
   image: ogImage,
-  jobTitle: 'ML Engineer',
+  jobTitle: 'Researcher',
   knowsAbout: [
-    'Fluid simulation',
-    'Visual systems',
-    'Machine learning',
+    'Diffusion models',
+    'MRI reconstruction',
+    'Medical imaging',
   ],
   sameAs: [
     'https://github.com/shiru2/portfolyo-me',
-    'https://www.instagram.com/81_arigato/?hl=ja',
-    'https://www.kaggle.com/shiru2',
   ],
 };
 ---
@@ -47,7 +44,7 @@ const personLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <meta name="author" content="Hayato Tsukagoshi" />
+    <meta name="author" content="Tomoki Sawai" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#0a0b0d" />
@@ -55,7 +52,7 @@ const personLd = {
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Hayato Tsukagoshi" />
+    <meta property="og:site_name" content="Tomoki Sawai" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -69,8 +66,6 @@ const personLd = {
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@hpp_ricecake" />
-    <meta name="twitter:creator" content="@hpp_ricecake" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />

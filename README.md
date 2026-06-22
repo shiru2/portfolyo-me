@@ -1,7 +1,7 @@
 # portfolyo-me
 
-Single-page personal site with a dark, refined, minimal
-flow-field background and a small parameter panel.
+Single-page personal site with a layered editorial layout,
+dark flow-field background, and a small parameter panel.
 
 ## Stack
 
@@ -40,7 +40,7 @@ GitHub Pages actions).
 src/
   layouts/Base.astro     # <head>, meta/OG, font preload, poster canvas, deferred boot
   pages/index.astro      # content (hero, statement, selected work, projects, links)
-  scripts/boot.ts        # tiny: reveals, corner index, email reveal, gated fluid loader
+  scripts/boot.ts        # tiny: reveal + gated fluid loader
   scripts/fluid.ts       # OGL curl-noise flow field (pointer/touch interaction)
   styles/global.css      # design tokens, type, motion, components
 public/                  # .nojekyll, fonts/, favicon, og.jpg
@@ -49,7 +49,6 @@ public/                  # .nojekyll, fonts/, favicon, og.jpg
 
 ## Before launch — confirm (see `.agents/research/00-SYNTHESIS.md`)
 
-- Public email address (currently a placeholder in `index.astro`).
 - X handle (`@hayato_tkgs` vs `@hpp_ricecake`), PhD wording.
 - Exact co-authors, order, and ACL Anthology URLs for the selected publications
   (marked `TODO` in `src/pages/index.astro`).
