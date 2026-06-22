@@ -181,7 +181,7 @@ body::before {
 }
 
 .hero-summary {
-  max-width: 36rem;
+  max-width: none;
   font-size: clamp(1rem, 1.8vw, 1.12rem);
   line-height: 1.65;
   color: #ffffff;
