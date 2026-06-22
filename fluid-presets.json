@@ -1,5 +1,30 @@
 {
   "current": {
+    "date": "2026-06-23",
+    "note": "赤寄り、渦巻き緩め、残留やや長め",
+    "params": {
+      "colorR": 0.65,
+      "colorG": 0.02,
+      "colorB": 0.04,
+      "ambientCount": 2,
+      "ambientSize": 0.68,
+      "ambientDye": 0.2,
+      "windStrength": 0.3,
+      "windScale": 1.23,
+      "windHold": 3.9,
+      "windMorph": 6.4,
+      "vorticity": 5,
+      "velocityDissipation": 0.18,
+      "dyeDissipation": 0.09,
+      "bloomAmt": 0.58,
+      "bloomThreshold": 0.2,
+      "bloomKnee": 0.12,
+      "blackPoint": 0.18,
+      "cursorForce": 3200,
+      "cursorSize": 0.5
+    }
+  },
+  "v1": {
     "date": "2026-06-22",
     "note": "流体量を抑えてゆったりに調整",
     "params": {

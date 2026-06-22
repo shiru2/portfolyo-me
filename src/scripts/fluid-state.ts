@@ -21,8 +21,8 @@ export interface FluidParams {
 }
 
 export const defaults: FluidParams = {
-  colorR: 0.55,
-  colorG: 0.04,
+  colorR: 0.65,
+  colorG: 0.02,
   colorB: 0.04,
   ambientCount: 2,
   ambientSize: 0.68,
@@ -31,9 +31,9 @@ export const defaults: FluidParams = {
   windScale: 1.23,
   windHold: 3.9,
   windMorph: 6.4,
-  vorticity: 12,
+  vorticity: 5,
   velocityDissipation: 0.18,
-  dyeDissipation: 0.13,
+  dyeDissipation: 0.09,
   bloomAmt: 0.58,
   bloomThreshold: 0.2,
   bloomKnee: 0.12,
