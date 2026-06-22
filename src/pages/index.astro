@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import { controlGroups } from '../scripts/fluid-controls';
+
+const links = [
+  { label: 'GitHub', href: 'https://github.com/shiru2/portfolyo-me' },
+  { label: 'Instagram', href: 'https://www.instagram.com/81_arigato/?hl=ja' },
+  { label: 'Kaggle', href: 'https://www.kaggle.com/shiru2' },
+];
+---
+
+<Base>
+  <main class="hero">
+    <div class="hero-inner">
+      <h1 class="hero-name">Hayato Tsukagoshi</h1>
+      <p class="hero-role reveal">
+        ML engineer<span class="sep">/</span>fluid experiments<span class="sep">/</span>personal work
+      </p>
+      <p class="hero-summary reveal">
+        Selected work and experiments, centered on visual systems and model work.
+      </p>
+      <nav class="hero-links reveal" aria-label="Links">
+        {links.map((l) => <a class="link" href={l.href} rel="me noopener" target="_blank">{l.label}</a>)}
+        <button class="link copied" id="email" type="button"
+          data-user="hpp.ricecake" data-domain="gmail.com" aria-label="Reveal email">Email</button>
+      </nav>
+    </div>
+  </main>
+  <aside class="fluid-panel" id="fluid-controls" aria-label="流体調整">
+    <div class="fluid-panel-head">
+      <p class="fluid-title">調整</p>
+      <button class="fluid-reset" type="button" data-reset>デフォルトに戻す</button>
+    </div>
+    {controlGroups.map((group) => (
+      <section class="fluid-group" aria-label={group.title}>
+        <h2 class="fluid-group-title">{group.title}</h2>
+        <div class="fluid-grid">
+          {group.items.map((item) => {
+            const id = `fluid-${item.key}`;
+            return (
+              <label class="fluid-control" for={id}>
+                <span class="fluid-control-head">
+                  <span class="fluid-control-label">{item.label}</span>
+                  <output class="fluid-control-value" data-output-for={item.key} />
+                </span>
+                <input
+                  id={id}
+                  type="range"
+                  min={item.min}
+                  max={item.max}
+                  step={item.step}
+                  value={item.defaultValue}
+                  data-param={item.key}
+                  aria-label={item.label}
+                />
+              </label>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </aside>
+</Base>
