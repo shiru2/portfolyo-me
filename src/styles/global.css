@@ -300,7 +300,7 @@ body::before {
 }
 
 .inline-url {
-  color: inherit;
+  color: #ffffff;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
