@@ -118,6 +118,23 @@ uniform sampler2D uTex;
 uniform float uValue;
 void main(){ fragColor = vec4(texture(uTex, vUv).x * uValue, 0.0, 0.0, 1.0); }`;
 
+const BOUNDARY = HEAD + `
+uniform sampler2D uVelocity;
+uniform vec2 uTexel;
+void main(){
+  vec2 vel = texture(uVelocity, vUv).xy;
+  float margin = 3.0;
+  float px = vUv.x / uTexel.x;
+  float py = vUv.y / uTexel.y;
+  float maxX = 1.0 / uTexel.x;
+  float maxY = 1.0 / uTexel.y;
+  if (px < margin)            vel.x =  abs(vel.x);
+  if (px > maxX - margin)     vel.x = -abs(vel.x);
+  if (py < margin)            vel.y =  abs(vel.y);
+  if (py > maxY - margin)     vel.y = -abs(vel.y);
+  fragColor = vec4(vel, 0.0, 1.0);
+}`;
+
 const PRESSURE = HEAD + `
 uniform sampler2D uPressure;
 uniform sampler2D uDivergence;
@@ -308,6 +325,7 @@ function startSim(canvas: HTMLCanvasElement): void {
   const prefilter = prog(PREFILTER, { uTexture: { value: null }, uThreshold: { value: 0.20 }, uKnee: { value: 0.12 } });
   const blur = prog(BLUR, { uTexture: { value: null }, uDir: { value: [0, 0] } });
   const display = prog(DISPLAY, { uDye: { value: null }, uBloom: { value: null }, uTexelDye: { value: texelDye }, uResolution: { value: [1, 1] }, uReveal: { value: 1 }, uTime: { value: 0 }, uBloomAmt: { value: fluidState.bloomAmt }, uBlack: { value: fluidState.blackPoint }, uTextC: { value: [0.2, 0.5] }, uTextR: { value: [0.34, 0.26] }, uTextDim: { value: 0.5 } });
+  const boundaryP = prog(BOUNDARY, { uVelocity: { value: null }, uTexel: { value: texelSim } });
   const forceP = prog(FORCE, { uVelocity: { value: null }, uTime: { value: 0 }, uAmt: { value: fluidState.windStrength }, uScale: { value: fluidState.windScale }, uAspect: { value: 1 }, uWindP: { value: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5] }, uWindW: { value: [1, 0, 0] } });
 
   function pass(p: { mesh: Mesh }, target: RenderTarget | null) {
@@ -492,7 +510,8 @@ function startSim(canvas: HTMLCanvasElement): void {
       // bright dye on the cursor so it crosses the bloom threshold and reads as a luminous,
       // glowing trail — the main sense of interaction (mobile stays a touch gentler)
       const touchSizeScale = isCoarse ? 0.7 : 1;
-      doSplat(emitX, emitY, (emitX - prevEmitX) * fluidState.cursorForce, (emitY - prevEmitY) * fluidState.cursorForce, lapis((0.05 + 0.09 * srcSize) * fr), 0.011 * fluidState.cursorSize * touchSizeScale);
+      const touchDyeBoost = isCoarse ? 1.6 : 1;
+      doSplat(emitX, emitY, (emitX - prevEmitX) * fluidState.cursorForce, (emitY - prevEmitY) * fluidState.cursorForce, lapis((0.05 + 0.09 * srcSize) * fr * touchDyeBoost), 0.011 * fluidState.cursorSize * touchSizeScale);
       cursorActive = true;
     } else { emitX = input.x; emitY = input.y; cursorActive = false; }
     prevEmitX = emitX; prevEmitY = emitY;
@@ -507,6 +526,7 @@ function startSim(canvas: HTMLCanvasElement): void {
     press.u.uDivergence.value = divergence.texture;
     for (let i = 0; i < N; i++) { press.u.uPressure.value = pressure.read.texture; pass(press, pressure.write); pressure.swap(); }
     gradP.u.uPressure.value = pressure.read.texture; gradP.u.uVelocity.value = velocity.read.texture; pass(gradP, velocity.write); velocity.swap();
+    if (isCoarse) { boundaryP.u.uVelocity.value = velocity.read.texture; pass(boundaryP, velocity.write); velocity.swap(); }
     advect.u.uTexel.value = texelSim; advect.u.uDt.value = dt;
     advect.u.uVelocity.value = velocity.read.texture; advect.u.uSource.value = velocity.read.texture; advect.u.uDissipation.value = fluidState.velocityDissipation;
     pass(advect, velocity.write); velocity.swap();
