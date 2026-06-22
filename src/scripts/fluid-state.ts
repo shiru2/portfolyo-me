@@ -21,9 +21,9 @@ export interface FluidParams {
 }
 
 export const defaults: FluidParams = {
-  colorR: 0.44,
-  colorG: 0.10,
-  colorB: 0.06,
+  colorR: 0.55,
+  colorG: 0.04,
+  colorB: 0.04,
   ambientCount: 2,
   ambientSize: 0.68,
   ambientDye: 0.2,
@@ -39,7 +39,7 @@ export const defaults: FluidParams = {
   bloomKnee: 0.12,
   blackPoint: 0.18,
   cursorForce: 3200,
-  cursorSize: 1,
+  cursorSize: 0.5,
 };
 
 export const backupCurrent: FluidParams = { ...defaults };

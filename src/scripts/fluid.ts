@@ -491,7 +491,8 @@ function startSim(canvas: HTMLCanvasElement): void {
       emitY += (input.y - emitY) * (1 - Math.exp(-16 * dt));
       // bright dye on the cursor so it crosses the bloom threshold and reads as a luminous,
       // glowing trail — the main sense of interaction (mobile stays a touch gentler)
-      doSplat(emitX, emitY, (emitX - prevEmitX) * fluidState.cursorForce, (emitY - prevEmitY) * fluidState.cursorForce, lapis((0.05 + 0.09 * srcSize) * fr), 0.011 * fluidState.cursorSize);
+      const touchSizeScale = isCoarse ? 0.7 : 1;
+      doSplat(emitX, emitY, (emitX - prevEmitX) * fluidState.cursorForce, (emitY - prevEmitY) * fluidState.cursorForce, lapis((0.05 + 0.09 * srcSize) * fr), 0.011 * fluidState.cursorSize * touchSizeScale);
       cursorActive = true;
     } else { emitX = input.x; emitY = input.y; cursorActive = false; }
     prevEmitX = emitX; prevEmitY = emitY;
